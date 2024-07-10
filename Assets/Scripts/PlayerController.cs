@@ -31,7 +31,6 @@ public class PlayerController : MonoBehaviour
         if (!GameManager.instance.isEventDoing)
         {
             PlayerMove();
-            //BodyRotate();
             PlayerRotate();
             PlayerJump();
         }

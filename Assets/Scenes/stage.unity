@@ -465,7 +465,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2044171413
 Transform:
   m_ObjectHideFlags: 0
@@ -1731,6 +1731,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1403052184061793806, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
+      propertyPath: m_UiScaleMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403052184061793806, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
+      propertyPath: m_ScreenMatchMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403052184061793806, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
+      propertyPath: m_ReferenceResolution.x
+      value: 960
+      objectReference: {fileID: 0}
+    - target: {fileID: 1403052184061793806, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
+      propertyPath: m_ReferenceResolution.y
+      value: 540
+      objectReference: {fileID: 0}
+    - target: {fileID: 2359681851789596682, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -240
+      objectReference: {fileID: 0}
+    - target: {fileID: 2359681851789596682, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 224
+      objectReference: {fileID: 0}
     - target: {fileID: 3013709303986078525, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
       propertyPath: m_Name
       value: PlayerUI
@@ -1815,13 +1839,41 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7509178093742287412, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
+      propertyPath: m_fontSize
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 7509178093742287412, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
+      propertyPath: m_margin.z
+      value: 227.82816
+      objectReference: {fileID: 0}
+    - target: {fileID: 7509178093742287412, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 7509178093742287412, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 512
+      objectReference: {fileID: 0}
+    - target: {fileID: 7509178093742287412, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8241626142178213525, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 1952260076}
     - target: {fileID: 8241626142178213525, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
+      propertyPath: m_RenderMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8241626142178213525, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
       propertyPath: m_SortingLayerID
       value: 298594625
+      objectReference: {fileID: 0}
+    - target: {fileID: 8241626142178213525, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
+      propertyPath: m_VertexColorAlwaysGammaSpace
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

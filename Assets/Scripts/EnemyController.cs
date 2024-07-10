@@ -14,7 +14,6 @@ public class EnemyController : MonoBehaviour
     [SerializeField] float rotationSpeed = 2.0f;
 
 
-
     private Animator anim = null;
     private bool isDiscovered = false;
     private RaycastHit[] rayCastHits; // 当たり判定を保持 -- startで初期化
@@ -40,33 +39,12 @@ public class EnemyController : MonoBehaviour
     }
 
 
-    ///// <summary>
-    ///// transorm.forwardの方向に進む
-    ///// </summary>
-    //private void moveForward()
-    //{
-    //    moveDirection = transform.forward;
-    //    transform.position += moveDirection * moveSpeed * Time.deltaTime;
-    //}
-
-    ///// <summary>
-    ///// 発見したプレイヤの方向に進む
-    ///// </summary>
-    //private void move2Player()
-    //{
-    //    //
-    //}
-
     private void Moving()
     {
         transform.position += moveDirection * moveSpeed * Time.deltaTime;
         Debug.Log($"moveSpeed: {moveSpeed}");
     }
 
-    private void turnRight()
-    {
-        // 
-    }
 
 
     private void OnDetectObj(Collider collider)
@@ -112,12 +90,7 @@ public class EnemyController : MonoBehaviour
                 // 元の向きに戻る
                 transform.rotation = Quaternion.Slerp(transform.rotation, originalRotation, Time.deltaTime * rotationSpeed);
 
-                // 元の位置に戻る
-                //Vector3 direction = (originalPosition - transform.position).normalized;
-                //if (Vector3.Distance(transform.position, originalPosition) > 0.1f)
-                //{
-                //    transform.position += direction * moveSpeed * Time.deltaTime;
-                //}
+                // 進む方向を向く
                 moveDirection = transform.forward;
             }
         }
@@ -143,12 +116,7 @@ public class EnemyController : MonoBehaviour
         // 元の向きに戻る
         transform.rotation = Quaternion.Slerp(transform.rotation, originalRotation, Time.deltaTime * rotationSpeed);
 
-        // 元の位置に戻る
-        //Vector3 direction = (originalPosition - transform.position).normalized;
-        //if (Vector3.Distance(transform.position, originalPosition) > 0.1f)
-        //{
-        //    transform.position += direction * moveSpeed * Time.deltaTime;
-        //}
+        // 進む方向を向く
         moveDirection = transform.forward;
     }
 }
