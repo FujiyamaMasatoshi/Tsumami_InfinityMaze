@@ -4,15 +4,20 @@ using UnityEngine;
 
 public class StageManager : MonoBehaviour
 {
-    public static int MAZE_VERTICAL = 15;
-    public static int MAZE_WIDTH = 15;
+    public static int MAZE_VERTICAL = 13;
+    public static int MAZE_WIDTH = 13;
 
     public int blockSize = 5;
 
     [Header("プレイヤ")] public GameObject player = null;
+    [Header("マグマ")] public GameObject lavaObj = null;
+
+    [SerializeField] private float waitLavaMovingTime = 10.0f; // マグマが動き出すまでの時間
+    [SerializeField] private float lavaMovingSpeed = 10.0f;
+
     [SerializeField] private int wallHeight = 3; // 1ステージあたりの壁の高さ
     [SerializeField] private int floorHeight = 1; //床の高さ
-    
+    [SerializeField] private float startLavaHeight = -10;
 
 
     // 迷路要素
@@ -24,12 +29,43 @@ public class StageManager : MonoBehaviour
     private char GOAL = 'g';
     private char ENEMY = 'e';
 
-
+    // ゲームがスタートして経過した時間
+    private float gamePlayTime = 0.0f;
     
     private int[] startPoint = { 0, 0}; // スタート地点
     private int[] goalPoint = { 0, 0 }; // ゴール地点
 
     private char[,] map = new char[MAZE_VERTICAL, MAZE_VERTICAL];
+
+
+    /// <summary>
+    /// map[j, -startLavaPos, i]にマグマ生成
+    /// </summary>
+    private void GenerateLava(int i, int j)
+    {
+
+        // lavaObjの子オブジェクトとしてlavaをInstantiateする
+        GameObject lava = Instantiate((GameObject)Resources.Load("lava"), Vector3.zero, Quaternion.identity);
+        lava.transform.SetParent(lavaObj.transform);
+
+        // 位置調整
+        lava.transform.position = new Vector3(
+                        j * blockSize * lava.transform.localScale.x,
+                        startLavaHeight,
+                        i * blockSize * lava.transform.localScale.z);
+   
+    }
+
+    /// <summary>
+    /// マグマを動かす, updateで呼び出す
+    /// </summary>
+    private void MoveLava()
+    {
+        if (gamePlayTime > waitLavaMovingTime)
+        {
+            lavaObj.transform.position += Vector3.up * Time.deltaTime * lavaMovingSpeed;
+        }
+    }
 
 
     // mapをconsoleに表示
@@ -274,7 +310,15 @@ public class StageManager : MonoBehaviour
                 else
                 {
                     // start以外の床だけ生成する
-                    if (map[j,i] != START)
+                    if (map[j,i] == START)
+                    {
+                        //GameObject emptyBlock = (GameObject)Resources.Load("emptyBlock");
+                        //Instantiate(emptyBlock, new Vector3(
+                        //j * blockSize * emptyBlock.transform.localScale.x,
+                        //(GameManager.instance.n_stage * (floorHeight + wallHeight) + floorHeight) * blockSize * emptyBlock.transform.localScale.y,
+                        //i * blockSize * emptyBlock.transform.localScale.z), Quaternion.identity);
+                    }
+                    else
                     {
                         // GOALを生成する時
                         if (map[j, i] == GOAL)
@@ -299,18 +343,19 @@ public class StageManager : MonoBehaviour
 
 
 
-                //// 壁を生成
-                //if (map[j, i] == WALL)
-                //{
-                //    for (int h = 1; h <= wallHeight + 1; h++)
-                //    {
-                //        Instantiate(block, new Vector3(
-                //            j * blockSize * block.transform.localScale.x,
-                //            (GameManager.instance.n_stage * (floorHeight + wallHeight) + h) * blockSize * block.transform.localScale.y,
-                //            /*GameManager.instance.n_stage * (h+floorHeight+1) * blockSize * block.transform.localScale.y,*/
-                //            i * blockSize * block.transform.localScale.z), Quaternion.identity);
-                //    }
-                //}
+                // 壁を生成
+                if (map[j, i] == WALL)
+                {
+                    for (int h = 1; h <= wallHeight + 1; h++)
+                    {
+                        block = (GameObject)Resources.Load("wall");
+                        Instantiate(block, new Vector3(
+                            j * blockSize * block.transform.localScale.x,
+                            (GameManager.instance.n_stage * (floorHeight + wallHeight) + h) * blockSize * block.transform.localScale.y,
+                            /*GameManager.instance.n_stage * (h+floorHeight+1) * blockSize * block.transform.localScale.y,*/
+                            i * blockSize * block.transform.localScale.z), Quaternion.identity);
+                    }
+                }
 
                 // プレイヤを設置
                 // 初期生成のみプレイヤを設置する
@@ -342,6 +387,16 @@ public class StageManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // マグマ生成
+        for (int i=0; i<MAZE_WIDTH; i++)
+        {
+            for (int j=0; j<MAZE_VERTICAL; j++)
+            {
+                GenerateLava(i, j);
+            }
+        }
+        
+
         // 初期マップを生成
         for (int i=0; i<GameManager.instance.n_first_stage; i++)
         {
@@ -365,6 +420,10 @@ public class StageManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        // ゲーム時間を進める
+        gamePlayTime += Time.deltaTime;
+
         if (GameManager.instance.n_stage - GameManager.instance.n_now_stage == 2)
         {
             
@@ -387,5 +446,10 @@ public class StageManager : MonoBehaviour
 
         }
         //Debug.Log($"player.transform.position in Update: {player.transform.position}");
+
+        // #############
+        // マグマを動かす
+        // #############
+        MoveLava();
     }
 }

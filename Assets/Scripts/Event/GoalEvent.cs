@@ -4,22 +4,11 @@ using UnityEngine;
 
 public class GoalEvent : MonoBehaviour
 {
-    [SerializeField] float upSpeed = 5.0f;
-
+    [SerializeField] float upSpeed = 0.1f;
+    [SerializeField] float waitSeconds = 0.005f;
 
     private bool isExecuted = false; // 1回しか実行しないので、実行したかどうかを判定
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
 
     private IEnumerator GoNextStage(Collision collision)
@@ -35,12 +24,12 @@ public class GoalEvent : MonoBehaviour
             GameManager.instance.isEventDoing = true;
             Vector3 startPos = transform.position;
             //Vector3 currentPos = transform.position;
-            while (transform.position.y < startPos.y + 5/*blockSize*/* 3/*wallHeight*/*2.5/*block scale*/)
+            while (transform.position.y < startPos.y + 5/*blockSize*/* (3+1)/*wallHeight+1*/* 2/*block scale*/)
             {
                 transform.position += Vector3.up * upSpeed; // blockを上昇させる
                 collision.transform.position += Vector3.up * upSpeed; //プレイヤも上昇させる
                 Debug.Log($"{transform.position.y}");
-                yield return new WaitForSecondsRealtime(0.5f); // 1秒待つ（リアルタイム）
+                yield return new WaitForSecondsRealtime(waitSeconds); // 1秒待つ（リアルタイム）
 
             }
             // 終了したら、イベント終了
@@ -51,14 +40,27 @@ public class GoalEvent : MonoBehaviour
             // 時間を動かす
             Time.timeScale = 1.0f;
 
-            
+
         }
     }
 
 
     private void OnCollisionEnter(Collision collision)
     {
-        StartCoroutine(GoNextStage(collision));
+        if (collision.collider.CompareTag("Player"))
+        {
+            StartCoroutine(GoNextStage(collision));
+        }
+
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        //if (collision.collider.CompareTag("Player"))
+        //{
+        //    col = collision.gameObject;
+        //    isOnGoalBlock = true;
+        //}
     }
 
 
