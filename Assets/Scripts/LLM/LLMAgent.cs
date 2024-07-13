@@ -31,7 +31,7 @@ public class LLMAgent : MonoBehaviour
     void Start()
     {
         // UserPromptの設定
-        initPrompt = "あなたはこれから与えられる指示に忠実なアシスタントです。これから与える<指示>の内容を<条件>に従って出力をしてください。<指示>には、あなたが出力すべき方向を教えてくれます。指示の内容に合う方向を<出力形式>の中から適切なものを1つ選び、出力してください。\n<出力形式>: {right}, {left}, {forward}, {back}\n<指示>: ";
+        initPrompt = "あなたはこれから与えられる指示に忠実なアシスタントです。あなたには、<指示>として動くべき方向について情報が与えられます。その情報を元に以下の出力形式に従って出力してください。\n<出力形式>: JSON形式\n<例>: *あなたが前方に進むべきだと考えた場合: {move: forward}\n* 後ろに下がる場合だと判断した場合: {move: back}\n* 右に進むべきだと思った場合: {move: right}\n* 左に進むべき場合だと思った場合: {move: left}\n以上のように出力してください。\n<指示>: ";
         userPrompt += initPrompt;
         // モデルパス (Build for Mac)
         model_path = System.IO.Path.Combine(Application.streamingAssetsPath, "LLM_Model/Llama-3-ELYZA-JP-8B-Q3_K_L.gguf");

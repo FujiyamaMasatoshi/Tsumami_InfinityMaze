@@ -732,6 +732,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockSize: 5
   blockScale: 2
+  textMeshPro: {fileID: 1053234254}
   player: {fileID: 779206472721269042}
   lavaObj: {fileID: 1551800161}
   lavaMovingSpeed: 1
@@ -739,6 +740,7 @@ MonoBehaviour:
   floorHeight: 1
   startLavaHeight: -40
   n_enemy: 5
+  max_token: 64
 --- !u!1001 &618978560766931403
 PrefabInstance:
   m_ObjectHideFlags: 0

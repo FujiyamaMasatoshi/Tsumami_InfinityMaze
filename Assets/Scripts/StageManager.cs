@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using LlamaCppUnity;
+using System.Threading.Tasks;
 
 public class StageManager : MonoBehaviour
 {
@@ -9,6 +12,8 @@ public class StageManager : MonoBehaviour
 
     public float blockSize = 5f;
     public float blockScale = 2f;
+
+    public TextMeshProUGUI textMeshPro = null; // LLMで生成したメッセージを出力する
 
     [Header("プレイヤ")] public GameObject player = null;
     [Header("マグマ")] public GameObject lavaObj = null;
@@ -21,7 +26,14 @@ public class StageManager : MonoBehaviour
     [SerializeField] private int floorHeight = 1; //床の高さ
     [SerializeField] private float startLavaHeight = -10;
     [SerializeField] private int n_enemy = 5;
-    
+    [SerializeField] private uint max_token = 32;
+
+
+    // LLM
+    private Llama llm;
+    private string initPrompt = "";
+    private string userPrompt = "";
+    private bool isGenerating = false;
 
     // 迷路要素
     private char WALL = '#';
@@ -31,7 +43,6 @@ public class StageManager : MonoBehaviour
     private char TREASURE = 't';
     private char GOAL = 'g';
     private char ENEMY = 'e';
-
     
     private int[] startPoint = { 0, 0}; // スタート地点
     private int[] goalPoint = { 0, 0 }; // ゴール地点
@@ -42,6 +53,15 @@ public class StageManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // ######
+        // LLM
+        // ######
+        string modelPath = System.IO.Path.Combine(Application.streamingAssetsPath, "LLM_Model/Llama-3-ELYZA-JP-8B-Q3_K_L.gguf");
+        llm = new Llama(modelPath); //If there is insufficient memory, the model will fail to load.
+
+        initPrompt = "あなたは、的確にmapの道筋を教えてくれるアシスタントです。あなたには、迷路の情報である<map>が与えられます。このマップは、壁(#)、道(.)、スタート地点(s)、ゴール地点(g)で構成された2次元配列として表現されています。プレイヤはsからスタートしてゴール地点を目指します。プレイヤは、道(.)しか通ることができず、素早くゴールまで辿り着くことが求められます。与えられた<map>からゴール地点(g)までのルートを、論理的、かつ、段階的に説明してください\n例えば、\n####\n#s.#\n##.#\n##g#\nのように表されたmapであれば、「まずは行き止まりまで右に進んで、その後、後ろ方向に進んでください。そうすればゴール地点にと取りつけます。」のように説明文を出力してください。\n<map>\n";
+        userPrompt += initPrompt;
+
         // GMのタイマーをリセット (waitTime + lavaHeight)に設定
         GameManager.instance.lavaTime = Mathf.Abs(startLavaHeight)/lavaMovingSpeed;
         GameManager.instance.n_lava_stage += 1;
@@ -72,6 +92,30 @@ public class StageManager : MonoBehaviour
 
 
     }
+
+
+
+    // 非同期処理
+    private string AsyncGenerateText()
+    {
+        string result = "";
+        foreach (string text in llm.RunStream(userPrompt, maxTokens: max_token))
+        {
+            result += text;
+        }
+        return result;
+    }
+
+
+    async void SetText()
+    {
+        isGenerating = true;
+        // userPromptを設定
+        userPrompt += GetMap();
+        textMeshPro.text = await Task.Run(() => AsyncGenerateText());
+        isGenerating = false;
+    }
+
 
 
     /// <summary>
@@ -131,6 +175,21 @@ public class StageManager : MonoBehaviour
             map_string += "\n";
         }
         Debug.Log(map_string);
+    }
+
+    // map情報を文字列型で取得
+    private string GetMap()
+    {
+        string result = "";
+        for (int i=0; i<MAZE_VERTICAL; i++)
+        {
+            for (int j=0; j<MAZE_WIDTH; j++)
+            {
+                result += map[i, j];
+            }
+            result += "\n";
+        }
+        return result;
     }
 
 
@@ -501,5 +560,12 @@ public class StageManager : MonoBehaviour
         // マグマを動かす
         // #############
         MoveLava();
+
+
+        // テキスト生成
+        if (isGenerating == false)
+        {
+            SetText();
+        }
     }
 }
