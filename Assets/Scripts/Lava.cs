@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Lava : MonoBehaviour
 {
@@ -41,6 +42,8 @@ public class Lava : MonoBehaviour
         if (collision.collider.CompareTag("Player"))
         {
             Debug.Log("game over");
+            SceneManager.LoadScene("result");
+
         }
         //else
         //{

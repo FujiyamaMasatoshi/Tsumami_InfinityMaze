@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.defios.llamacppunity": {
+      "version": "https://github.com/DefiosLab/LlamaCppUnity.git?path=/Packages/",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "7635bb654f0fe6e2227b492fdc51b42acfb95545"
+    },
     "com.unity.cinemachine": {
       "version": "2.9.7",
       "depth": 0,

@@ -13,6 +13,7 @@ public class GoalEvent : MonoBehaviour
 
     private IEnumerator GoNextStage(Collision collision)
     {
+        Debug.Log("collision name:" + collision.gameObject.name);
         if (!isExecuted)
         {
             // playerのGM.now_stageを+1する
@@ -21,14 +22,20 @@ public class GoalEvent : MonoBehaviour
             // ゲーム時間を止める
             Time.timeScale = 0.0f;
 
+
             GameManager.instance.isEventDoing = true;
             Vector3 startPos = transform.position;
             //Vector3 currentPos = transform.position;
+
+            //当たり判定のobjectをゲット
+            GameObject col = collision.gameObject;
+
             while (transform.position.y < startPos.y + 5/*blockSize*/* (3+1)/*wallHeight+1*/* 2/*block scale*/)
             {
                 transform.position += Vector3.up * upSpeed; // blockを上昇させる
-                collision.transform.position += Vector3.up * upSpeed; //プレイヤも上昇させる
-                Debug.Log($"{transform.position.y}");
+                col.transform.position += Vector3.up * upSpeed; //プレイヤも上昇させる
+                
+                Debug.Log($"{transform.position.y}, {collision.transform.position.y}");
                 yield return new WaitForSecondsRealtime(waitSeconds); // 1秒待つ（リアルタイム）
 
             }

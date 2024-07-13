@@ -7,35 +7,71 @@ public class StageManager : MonoBehaviour
     public static int MAZE_VERTICAL = 13;
     public static int MAZE_WIDTH = 13;
 
-    public int blockSize = 5;
+    public float blockSize = 5f;
+    public float blockScale = 2f;
 
     [Header("プレイヤ")] public GameObject player = null;
     [Header("マグマ")] public GameObject lavaObj = null;
-
-    [SerializeField] private float waitLavaMovingTime = 10.0f; // マグマが動き出すまでの時間
+    
+    
+    //[SerializeField] private float waitLavaMovingTime = 10.0f; // マグマが動き出すまでの時間
     [SerializeField] private float lavaMovingSpeed = 10.0f;
 
     [SerializeField] private int wallHeight = 3; // 1ステージあたりの壁の高さ
     [SerializeField] private int floorHeight = 1; //床の高さ
     [SerializeField] private float startLavaHeight = -10;
-
+    [SerializeField] private int n_enemy = 5;
+    
 
     // 迷路要素
     private char WALL = '#';
-    private char PATH = ' ';
+    private char PATH = '.';
     private char START = 's';
     private char KEY = 'k';
     private char TREASURE = 't';
     private char GOAL = 'g';
     private char ENEMY = 'e';
 
-    // ゲームがスタートして経過した時間
-    private float gamePlayTime = 0.0f;
     
     private int[] startPoint = { 0, 0}; // スタート地点
     private int[] goalPoint = { 0, 0 }; // ゴール地点
 
     private char[,] map = new char[MAZE_VERTICAL, MAZE_VERTICAL];
+
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        // GMのタイマーをリセット (waitTime + lavaHeight)に設定
+        GameManager.instance.lavaTime = Mathf.Abs(startLavaHeight)/lavaMovingSpeed;
+        GameManager.instance.n_lava_stage += 1;
+
+        // マグマ生成
+        for (int i = 0; i < MAZE_WIDTH; i++)
+        {
+            for (int j = 0; j < MAZE_VERTICAL; j++)
+            {
+                GenerateLava(i, j);
+            }
+        }
+
+
+        // 初期マップを生成
+        for (int i = 0; i < GameManager.instance.n_first_stage; i++)
+        {
+            // 迷路を生成
+            GenerateMap();
+
+            // 迷路を表示
+            PrintMaze();
+
+
+            // 迷路Objを生成
+            GenerateMazeInScene();
+        }
+
+
+    }
 
 
     /// <summary>
@@ -61,10 +97,24 @@ public class StageManager : MonoBehaviour
     /// </summary>
     private void MoveLava()
     {
-        if (gamePlayTime > waitLavaMovingTime)
+        lavaObj.transform.position += Vector3.up * Time.deltaTime * lavaMovingSpeed;
+        if (GameManager.instance.lavaTime <= 0)
         {
-            lavaObj.transform.position += Vector3.up * Time.deltaTime * lavaMovingSpeed;
+            GameManager.instance.lavaTime = (4*floorHeight * blockSize * blockScale) / lavaMovingSpeed; // リセット
+            GameManager.instance.n_lava_stage += 1;
         }
+        //if (GameManager.instance.lavaTime > waitLavaMovingTime)
+        //{
+        //    // 何もしない
+        //}
+        //else if (GameManager.instance.lavaTime <= waitLavaMovingTime)
+        //{
+        //    lavaObj.transform.position += Vector3.up * Time.deltaTime * lavaMovingSpeed;
+        //}
+        //if (GameManager.instance.lavaTime <= 0)
+        //{
+        //    GameManager.instance.lavaTime = waitLavaMovingTime + Mathf.Abs(startLavaHeight)/lavaMovingSpeed + GameManager.instance.blockSize; // リセット
+        //}
     }
 
 
@@ -97,6 +147,10 @@ public class StageManager : MonoBehaviour
 
         // ゴールを設定
         SetGoal();
+
+
+        // Enemyを配置
+        SetEnemy();
     }
 
     // 迷路マップの初期化
@@ -264,6 +318,23 @@ public class StageManager : MonoBehaviour
     }
 
 
+    private void SetEnemy()
+    {
+        // n体のEnemyをセットする
+        int now_enemy = 0;
+        while (now_enemy < n_enemy)
+        {
+            int x = Random.Range(0, MAZE_WIDTH);
+            int y = Random.Range(0, MAZE_VERTICAL);
+
+            if (map[y, x] == PATH)
+            {
+                map[y, x] = ENEMY;
+                now_enemy += 1;
+            }
+        }
+    }
+
     // Scene上に迷路を生成させる
     private void GenerateMazeInScene()
     {
@@ -357,6 +428,17 @@ public class StageManager : MonoBehaviour
                     }
                 }
 
+
+                // 敵をInstantiate
+                if (map[j, i] == ENEMY)
+                {
+                    GameObject enemy = (GameObject)Resources.Load("enemy1");
+                    Instantiate(enemy, new Vector3(j * blockSize * block.transform.localScale.x,
+                        (GameManager.instance.n_stage * (floorHeight + wallHeight) + floorHeight + 1) * blockSize * block.transform.localScale.y,
+                        i * blockSize * block.transform.localScale.z
+                        ), Quaternion.identity);
+                }
+
                 // プレイヤを設置
                 // 初期生成のみプレイヤを設置する
                 if (GameManager.instance.n_stage == 0)
@@ -384,45 +466,13 @@ public class StageManager : MonoBehaviour
 
 
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        // マグマ生成
-        for (int i=0; i<MAZE_WIDTH; i++)
-        {
-            for (int j=0; j<MAZE_VERTICAL; j++)
-            {
-                GenerateLava(i, j);
-            }
-        }
-        
-
-        // 初期マップを生成
-        for (int i=0; i<GameManager.instance.n_first_stage; i++)
-        {
-            // 迷路を生成
-            GenerateMap();
-
-            // 迷路を表示
-            PrintMaze();
-
-            //// プレイヤを召喚
-            //SpawnPlayer();
-
-
-            // 迷路Objを生成
-            GenerateMazeInScene();
-        }
-        
-        
-    }
 
     // Update is called once per frame
     void Update()
     {
 
         // ゲーム時間を進める
-        gamePlayTime += Time.deltaTime;
+        GameManager.instance.lavaTime -= Time.deltaTime;
 
         if (GameManager.instance.n_stage - GameManager.instance.n_now_stage == 2)
         {

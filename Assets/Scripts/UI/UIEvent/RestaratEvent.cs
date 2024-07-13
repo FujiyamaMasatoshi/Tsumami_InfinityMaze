@@ -1,0 +1,18 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+
+public class RestaratEvent : MonoBehaviour
+{
+    // restartイベント
+    public void Restart()
+    {
+        // ゲームマネージャーの情報を初期化する
+        GameManager.instance.InitGame();
+
+        // シーン遷移
+        SceneManager.LoadScene("stage");
+    }
+}

@@ -35,4 +35,12 @@ public class BlockObj : MonoBehaviour
     }
 
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.CompareTag("lava"))
+        {
+            Destroy(this.gameObject);
+        }
+    }
+
 }
