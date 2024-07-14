@@ -25,7 +25,8 @@ public class TextGeneration : MonoBehaviour
 
         llm = new Llama(modelPath); //If there is insufficient memory, the model will fail to load.
 
-        string meirei = "これから<map>として、迷路の情報が与えられます。このマップは、壁(#)、道(.)、スタート地点(s)、ゴール地点(g)で構成された2次元配列として表現されています。プレイヤはsからスタートしてゴール地点を目指します。その時のルートを\n<map>\n";
+        string meirei = "あなたは、フィールド上を動き回る敵キャラクタです。あなたは、プレイヤーにアタックするためにプレイヤーを探し回っています。プレイヤーを見つけた時、プレイヤーに対して話す言葉を考えて、<条件>を元に出力してください。\n <条件>\n* 「ガハハ!」や「ヒャッハー」のようにいかにも的敵キャラクタが喋りそうな口調にすること\n* プレイヤーを挑発するような内容\n* * 出力形式: 「セリフ」";
+
         userPrompt = meirei;
 
     }

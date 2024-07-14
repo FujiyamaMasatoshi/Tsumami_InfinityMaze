@@ -22,6 +22,11 @@ public class GameManager : MonoBehaviour
     public float lavaTime = 0.0f; // マグマが動き出すまでのカウントダウン(seconds)
 
 
+    // スコア
+    public int score = 0;
+    public int stagePoint = 500; // ステージ攻略につき500ポイント
+    public int enemyPoint = 50; // エネミーを倒すにつき50ポイント
+
     // startの前に呼び出される
     private void Awake()
     {
@@ -59,6 +64,8 @@ public class GameManager : MonoBehaviour
     {
         
     }
+
+    
 
     // Update is called once per frame
     void Update()

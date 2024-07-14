@@ -27,6 +27,7 @@ public class StageManager : MonoBehaviour
     [SerializeField] private float startLavaHeight = -10;
     [SerializeField] private int n_enemy = 5;
     [SerializeField] private uint max_token = 32;
+    [SerializeField] private float temperature = 0.5f;
 
 
     // LLM
@@ -59,7 +60,11 @@ public class StageManager : MonoBehaviour
         string modelPath = System.IO.Path.Combine(Application.streamingAssetsPath, "LLM_Model/Llama-3-ELYZA-JP-8B-Q3_K_L.gguf");
         llm = new Llama(modelPath); //If there is insufficient memory, the model will fail to load.
 
-        initPrompt = "あなたは、的確にmapの道筋を教えてくれるアシスタントです。あなたには、迷路の情報である<map>が与えられます。このマップは、壁(#)、道(.)、スタート地点(s)、ゴール地点(g)で構成された2次元配列として表現されています。プレイヤはsからスタートしてゴール地点を目指します。プレイヤは、道(.)しか通ることができず、素早くゴールまで辿り着くことが求められます。与えられた<map>からゴール地点(g)までのルートを、論理的、かつ、段階的に説明してください\n例えば、\n####\n#s.#\n##.#\n##g#\nのように表されたmapであれば、「まずは行き止まりまで右に進んで、その後、後ろ方向に進んでください。そうすればゴール地点にと取りつけます。」のように説明文を出力してください。\n<map>\n";
+        //initPrompt = "あなたは、フィールド上を動き回る敵キャラクタです。あなたは、プレイヤーにアタックするためにプレイヤーを探し回っています。プレイヤーを見つけた時、プレイヤーに対して話す言葉を考えて、<条件>を元に出力してください。\n <条件>\n* 「ガハハ!」や「ヒャッハー」のようにいかにも的敵キャラクタが喋りそうな口調にすること\n* プレイヤーを挑発するような内容\n* 発する言葉のみ";
+        //initPrompt = "あなたは「エビシー」という名前のキャラクターです。\nその特徴は以下のとおり。\n-語尾は「〜だシ！」です。\n-プレイヤーからすると敵なので、挑発します。\n-一人称は「オイラ」です。\n-敬語を使いません。\n台詞の例は以下のとおり。\n-君、ゲームへたっぴだシ\n-そんなんじゃ良いスコアは出せないだシ！\n-言ってることの意味がわからないシ！";
+        initPrompt = "ゲームに関するキーワードを3つ教えてください";
+        
+
         userPrompt += initPrompt;
 
         // GMのタイマーをリセット (waitTime + lavaHeight)に設定
@@ -93,13 +98,28 @@ public class StageManager : MonoBehaviour
 
     }
 
+    // クイズ生成
+    private string GenerateQuizKeywords()
+    {
+        string QuizKeywords = llm.Run(initPrompt, maxTokens: max_token, temperature: temperature);
+        return QuizKeywords;
+    }
 
+    async void GenerateQuiz()
+    {
+        isGenerating = true;
+        string QuizKeywords = await Task.Run(() => GenerateQuizKeywords());
+        Debug.Log($"クイズキーワード: {QuizKeywords}");
+        userPrompt = initPrompt + $"\n以下は、あなたが生成したゲームに関するキーワードです。「{QuizKeywords}」" + "これに基づいて、クイズを生成してください。";
+        textMeshPro.text = await Task.Run(() => llm.Run(userPrompt, maxTokens: max_token, temperature: temperature));
+        isGenerating = false;
+    }
 
     // 非同期処理
     private string AsyncGenerateText()
     {
         string result = "";
-        foreach (string text in llm.RunStream(userPrompt, maxTokens: max_token))
+        foreach (string text in llm.RunStream(userPrompt, maxTokens: max_token, temperature: temperature))
         {
             result += text;
         }
@@ -111,7 +131,7 @@ public class StageManager : MonoBehaviour
     {
         isGenerating = true;
         // userPromptを設定
-        userPrompt += GetMap();
+        userPrompt = initPrompt;
         textMeshPro.text = await Task.Run(() => AsyncGenerateText());
         isGenerating = false;
     }
@@ -565,7 +585,8 @@ public class StageManager : MonoBehaviour
         // テキスト生成
         if (isGenerating == false)
         {
-            SetText();
+            //SetText();
+            GenerateQuiz();
         }
     }
 }

@@ -319,7 +319,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 552.1387, y: 339.95917}
+  m_AnchoredPosition: {x: 552.1387, y: 361}
   m_SizeDelta: {x: 578.2205, y: 233.3796}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1053234254
@@ -740,7 +740,8 @@ MonoBehaviour:
   floorHeight: 1
   startLavaHeight: -40
   n_enemy: 5
-  max_token: 64
+  max_token: 128
+  temperature: 0.5
 --- !u!1001 &618978560766931403
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -831,10 +832,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4083486423356329395, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6914416585491307319, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}
-      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8241626142178213525, guid: d1795c8c3c08c45458e5a6f8c258be3e, type: 3}

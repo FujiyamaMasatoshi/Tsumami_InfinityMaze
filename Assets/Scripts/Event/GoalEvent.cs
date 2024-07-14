@@ -19,6 +19,9 @@ public class GoalEvent : MonoBehaviour
             // playerのGM.now_stageを+1する
             GameManager.instance.n_now_stage += 1;
 
+            // scoreを加算する
+            GameManager.instance.score += GameManager.instance.stagePoint;
+
             // ゲーム時間を止める
             Time.timeScale = 0.0f;
 
