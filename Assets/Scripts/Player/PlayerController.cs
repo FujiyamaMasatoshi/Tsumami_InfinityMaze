@@ -55,10 +55,12 @@ public class PlayerController : MonoBehaviour
     // 視点開店
     private void PlayerRotate()
     {
-        float mouseX = Input.GetAxis("Mouse X") * rotateSpeed;
+        //float mouseX = Input.GetAxis("Mouse X") * rotateSpeed;
+        float rotation = Input.GetAxis("Horizontal");
 
         // プレイヤーの横回転
-        transform.Rotate(new Vector3(0.0f, mouseX, 0.0f));
+        //transform.Rotate(new Vector3(0.0f, mouseX, 0.0f));
+        transform.Rotate(new Vector3(0.0f, rotation, 0.0f));
     }
 
 
@@ -67,10 +69,11 @@ public class PlayerController : MonoBehaviour
 
         // wasd入力を受け取る
         float forwardValue = Input.GetAxis("Vertical");
-        float rightValue = Input.GetAxis("Horizontal");
+        //float rightValue = Input.GetAxis("Horizontal");
 
         // 動く方向を決定
-        Vector3 moveDirection = transform.forward * forwardValue + transform.right * rightValue;
+        //Vector3 moveDirection = transform.forward * forwardValue + transform.right * rightValue;
+        Vector3 moveDirection = transform.forward * forwardValue;
 
         // moveDirectionの正規化
         moveDirection.Normalize();
@@ -92,11 +95,11 @@ public class PlayerController : MonoBehaviour
             body.transform.localScale = new Vector3(1.0f, 1.0f, -1.0f);
         }
 
-        // 回転させる
-        if (rightValue != 0)
-        {
-            body.transform.localEulerAngles = new Vector3(0.0f, body.transform.localScale.z * 90.0f * rightValue, 0.0f);
-        }
+        //// 回転させる
+        //if (rightValue != 0)
+        //{
+        //    body.transform.localEulerAngles = new Vector3(0.0f, body.transform.localScale.z * 90.0f * rightValue, 0.0f);
+        //}
 
 
 

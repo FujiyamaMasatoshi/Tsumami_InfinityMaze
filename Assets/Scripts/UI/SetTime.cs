@@ -28,6 +28,6 @@ public class SetTime : MonoBehaviour
     {
         // テキストを更新
         textMeshPro.text = $"ステージ{GameManager.instance.n_lava_stage}消滅まで\nあと" + time.ToString("F1")+"秒";
-        Debug.Log("time: "+time);
+        //Debug.Log("time: "+time);
     }
 }

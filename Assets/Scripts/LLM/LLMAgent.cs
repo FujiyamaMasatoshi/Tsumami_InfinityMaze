@@ -15,6 +15,10 @@ public class LLMAgent : MonoBehaviour
     [SerializeField] private float moveStep = 5.0f;
 
 
+    // プレイヤースタートポイント
+    public GameObject startPos = null;
+
+
     // LLM Agent
     private Llama llm; // llmモジュール
     private string model_path; // モデルパス
@@ -38,6 +42,9 @@ public class LLMAgent : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // プレイヤーポジションを設定
+        transform.localPosition = startPos.transform.localPosition;
+
         // UserPromptの設定
         //initPrompt = "あなたはこれから与えられる指示に忠実なアシスタントです。<指示>の内容に会う行動方向を出力してください。その時、<出力形式>に従って出力してください。なお、行動方向は次の4つから選択してください。{forward, back, right, left}\n<出力形式>: JSON形式({\"move\": \"行動方向\"})\n(例){move: forward}\n(例)\n前に進め -> {move:forward}\n前に進んでください -> {move:forward}\n後ろに下がれ ->{move:back}\n戻れ -> {move:back}\n右に進みなさい -> {move:right}\n右に進め -> {move:right}\nもうちょっと左に行って -> {move:left}\n左に行け -> {move:left}\n以上のように、指示の内容に沿った形式で出力してください。\n<指示>: \n";
 

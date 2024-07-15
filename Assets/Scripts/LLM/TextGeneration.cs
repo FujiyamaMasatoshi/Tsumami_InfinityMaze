@@ -25,13 +25,18 @@ public class TextGeneration : MonoBehaviour
 
         llm = new Llama(modelPath); //If there is insufficient memory, the model will fail to load.
 
-        string meirei = "あなたは、フィールド上を動き回る敵キャラクタです。あなたは、プレイヤーにアタックするためにプレイヤーを探し回っています。プレイヤーを見つけた時、プレイヤーに対して話す言葉を考えて、<条件>を元に出力してください。\n <条件>\n* 「ガハハ!」や「ヒャッハー」のようにいかにも的敵キャラクタが喋りそうな口調にすること\n* プレイヤーを挑発するような内容\n* * 出力形式: 「セリフ」";
 
-        userPrompt = meirei;
 
     }
 
+    private void CreatePrompt()
+    {
+        userPrompt = "入力された単語に関するクイズを答えと一緒に、json形式で生成してください。\n";
+        string ex1 = "(入力1)\nりんご\n(出力)\n{\"quiz\": \"林檎のロゴを代表するテック企業は?\", \"answer\": \"Apple\"}";
+        string ex3 = "(入力1)\nRPG\n(出力)\n{\"quiz\": \"堀井裕二が生みの親の国民的RPGは何?\", \"answer\": \"ドラゴンクエスト\"}";
+        string ex4 = "(入力1)\nりんご\n(出力)\n{\"quiz\": \"林檎のロゴを代表するテック企業は?\", \"answer\": \"Apple\"}";
 
+    }
 
     // 非同期処理
     private string AsyncGenerateText()

@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using LlamaCppUnity;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 public class StageManager : MonoBehaviour
 {
@@ -30,11 +31,22 @@ public class StageManager : MonoBehaviour
     [SerializeField] private float temperature = 0.5f;
 
 
+
     // LLM
     private Llama llm;
     private string initPrompt = "";
     private string userPrompt = "";
-    private bool isGenerating = false;
+    public bool isGenerating = false;
+    [SerializeField] private int n_playerPos = 50; // 履歴に保持するプレイヤの行動履歴数
+    [SerializeField] private float posAddTime = 0.2f;
+    private float posTimer = 0.0f; //ポジション追加時に使用するタイマー
+    public List<Vector2> playerPosSeq = new List<Vector2>(); // ポジション履歴
+    public List<Vector2> goalPos = new List<Vector2>();
+    
+    
+    private float cosSimilarity = 0.0f; // 進んでいる方向とゴールまでのcos類似度
+    private float remaingTime = 0.0f; // ゲームオーバーまでの残り時間計算
+
 
     // 迷路要素
     private char WALL = '#';
@@ -54,18 +66,20 @@ public class StageManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // ゲーム初期化
+        GameManager.instance.InitGame();
+        Time.timeScale = 1.0f;
+
         // ######
         // LLM
         // ######
         string modelPath = System.IO.Path.Combine(Application.streamingAssetsPath, "LLM_Model/Llama-3-ELYZA-JP-8B-Q3_K_L.gguf");
         llm = new Llama(modelPath); //If there is insufficient memory, the model will fail to load.
 
-        //initPrompt = "あなたは、フィールド上を動き回る敵キャラクタです。あなたは、プレイヤーにアタックするためにプレイヤーを探し回っています。プレイヤーを見つけた時、プレイヤーに対して話す言葉を考えて、<条件>を元に出力してください。\n <条件>\n* 「ガハハ!」や「ヒャッハー」のようにいかにも的敵キャラクタが喋りそうな口調にすること\n* プレイヤーを挑発するような内容\n* 発する言葉のみ";
-        //initPrompt = "あなたは「エビシー」という名前のキャラクターです。\nその特徴は以下のとおり。\n-語尾は「〜だシ！」です。\n-プレイヤーからすると敵なので、挑発します。\n-一人称は「オイラ」です。\n-敬語を使いません。\n台詞の例は以下のとおり。\n-君、ゲームへたっぴだシ\n-そんなんじゃ良いスコアは出せないだシ！\n-言ってることの意味がわからないシ！";
-        initPrompt = "ゲームに関するキーワードを3つ教えてください";
+        initPrompt = "あなたはこれから与えられる指示に忠実なアシスタントです。あなたには(1)プレイヤの進んでいるベクトルとプレイヤとゴールまでのベクトルのcos類似度と、(2)ゲームオーバーまでの時間が与えられます。プレイヤに適切な言葉をかけてください。\n";
         
-
-        userPrompt += initPrompt;
+         
+        //userPrompt += initPrompt;
 
         // GMのタイマーをリセット (waitTime + lavaHeight)に設定
         GameManager.instance.lavaTime = Mathf.Abs(startLavaHeight)/lavaMovingSpeed;
@@ -98,42 +112,107 @@ public class StageManager : MonoBehaviour
 
     }
 
-    // クイズ生成
-    private string GenerateQuizKeywords()
+
+
+    private void CreatePrompt()
     {
-        string QuizKeywords = llm.Run(initPrompt, maxTokens: max_token, temperature: temperature);
-        return QuizKeywords;
+        // cos類似度計算
+        compute_CosSimilarity();
+
+        // 残り時間計測
+        compute_RemainingTime();
+        userPrompt = "";
+        userPrompt += initPrompt;
+        string ex1 = "(入力1)\n{\"cos\":1.0, \"time\":10.0}\n(出力1)「時間が残り少ないけど、向かっている方向にゴールがあるよ!!」\n";
+        string ex2 = "(入力2)\n{\"cos\":-1.0, \"time\":30.0}\n(出力2)「ゴールと逆方向に進んでいるよ!!」\n";
+        string ex3 = "(入力3)\n{\"cos\":-0.7, \"time\":35.0}\n(出力3)「ゴールと逆方向に進んでいるよ!!。時間はたっぷりあるから焦らないで!!」\n";
+        //string ex4 = "(入力4)\n{\"cos\":0.6, \"time\":15.0}\n(出力4)「残り時間が残り少なくなってきているよ。その調子でゴールまで急いで！！」\n";
+
+        string input = "(入力4)\n{\"cos\":"+cosSimilarity+", \"time\":"+remaingTime+"}\n(出力4)\n";
+
+        // few shot prompt
+        //userPrompt += ex1 + ex2 + ex3 + ex4 + input;
+        userPrompt += ex1 + ex2 + ex3 + input;
     }
 
-    async void GenerateQuiz()
+
+    private void compute_CosSimilarity()
     {
-        isGenerating = true;
-        string QuizKeywords = await Task.Run(() => GenerateQuizKeywords());
-        Debug.Log($"クイズキーワード: {QuizKeywords}");
-        userPrompt = initPrompt + $"\n以下は、あなたが生成したゲームに関するキーワードです。「{QuizKeywords}」" + "これに基づいて、クイズを生成してください。";
-        textMeshPro.text = await Task.Run(() => llm.Run(userPrompt, maxTokens: max_token, temperature: temperature));
-        isGenerating = false;
+        // プレイヤの行動方向
+        if (playerPosSeq.Count > 10)
+        {
+            Vector2 pDirection = playerPosSeq[playerPosSeq.Count - 1] - playerPosSeq[0];
+
+            // プレイヤとゴールまでのベクトル
+            Vector2 player2goal = goalPos[GameManager.instance.n_now_stage] - playerPosSeq[0];
+
+
+            // cos類似度を計算
+            if (pDirection.magnitude != 0 && player2goal.magnitude != 0)
+            {
+                cosSimilarity = Vector2.Dot(pDirection, player2goal) / (pDirection.magnitude * player2goal.magnitude);
+                Debug.Log($"cos similarity: {cosSimilarity}");
+            }
+            else
+            {
+                Debug.Log("not compute cos similarity");
+            }
+        }
+        
+
+        
+        
     }
+
+
+    // 残り時間計算
+    private void compute_RemainingTime()
+    {
+        // 1層あたりの残り時間
+        float remaingTimePerFloor = (4 * floorHeight * blockSize * blockScale) / lavaMovingSpeed;
+
+        // 残り時間をセット
+        remaingTime = remaingTimePerFloor * (GameManager.instance.n_now_stage - GameManager.instance.n_lava_stage) + GameManager.instance.lavaTime;
+    }
+
+
+    private static string ExtractQuotedParts(string input)
+    {
+        // 正規表現を使って「」で囲まれた部分を抽出
+        List<string> quotedParts = new List<string>();
+        string pattern = "「(.*?)」";
+        MatchCollection matches = Regex.Matches(input, pattern);
+
+        foreach (Match match in matches)
+        {
+            quotedParts.Add(match.Groups[1].Value);
+        }
+
+        if (quotedParts.Count != 0) return quotedParts[0];
+        else return "";
+    }
+
 
     // 非同期処理
     private string AsyncGenerateText()
     {
-        string result = "";
-        foreach (string text in llm.RunStream(userPrompt, maxTokens: max_token, temperature: temperature))
-        {
-            result += text;
-        }
+        string result = llm.Run(userPrompt, maxTokens: max_token, temperature: temperature);
         return result;
     }
 
 
     async void SetText()
     {
-        isGenerating = true;
-        // userPromptを設定
-        userPrompt = initPrompt;
-        textMeshPro.text = await Task.Run(() => AsyncGenerateText());
-        isGenerating = false;
+        CreatePrompt(); // userPromptの設定
+        if (cosSimilarity != float.NaN)
+        {
+            isGenerating = true;
+
+            string llmOut = await Task.Run(() => AsyncGenerateText());
+            textMeshPro.text = ExtractQuotedParts(llmOut);
+            isGenerating = false;
+        }
+        
     }
 
 
@@ -167,18 +246,6 @@ public class StageManager : MonoBehaviour
             GameManager.instance.lavaTime = (4*floorHeight * blockSize * blockScale) / lavaMovingSpeed; // リセット
             GameManager.instance.n_lava_stage += 1;
         }
-        //if (GameManager.instance.lavaTime > waitLavaMovingTime)
-        //{
-        //    // 何もしない
-        //}
-        //else if (GameManager.instance.lavaTime <= waitLavaMovingTime)
-        //{
-        //    lavaObj.transform.position += Vector3.up * Time.deltaTime * lavaMovingSpeed;
-        //}
-        //if (GameManager.instance.lavaTime <= 0)
-        //{
-        //    GameManager.instance.lavaTime = waitLavaMovingTime + Mathf.Abs(startLavaHeight)/lavaMovingSpeed + GameManager.instance.blockSize; // リセット
-        //}
     }
 
 
@@ -317,7 +384,7 @@ public class StageManager : MonoBehaviour
             map[startPoint[1], startPoint[0]] = START;
 
         }
-        Debug.Log($"startPoint: {startPoint[0]}, {startPoint[1]}");
+        //Debug.Log($"startPoint: {startPoint[0]}, {startPoint[1]}");
     }
 
     // ゴールを設定する
@@ -369,7 +436,7 @@ public class StageManager : MonoBehaviour
         }
 
         map[goalPoint[1], goalPoint[0]] = GOAL;
-        Debug.Log($"goalPoint:{goalPoint[0]}, {goalPoint[1]}");
+        //Debug.Log($"goalPoint:{goalPoint[0]}, {goalPoint[1]}");
 
         // startPointからの調整
         if (startPoint[0] == MAZE_WIDTH-2)
@@ -462,11 +529,7 @@ public class StageManager : MonoBehaviour
                     // start以外の床だけ生成する
                     if (map[j,i] == START)
                     {
-                        //GameObject emptyBlock = (GameObject)Resources.Load("emptyBlock");
-                        //Instantiate(emptyBlock, new Vector3(
-                        //j * blockSize * emptyBlock.transform.localScale.x,
-                        //(GameManager.instance.n_stage * (floorHeight + wallHeight) + floorHeight) * blockSize * emptyBlock.transform.localScale.y,
-                        //i * blockSize * emptyBlock.transform.localScale.z), Quaternion.identity);
+                        // 何も生成しない
                     }
                     else
                     {
@@ -478,6 +541,11 @@ public class StageManager : MonoBehaviour
                         j * blockSize * goalBlock.transform.localScale.x,
                         (GameManager.instance.n_stage * (floorHeight + wallHeight) + floorHeight) * blockSize * goalBlock.transform.localScale.y,
                         i * blockSize * goalBlock.transform.localScale.z), Quaternion.identity);
+
+                            // goalPosに追加
+                            goalPos.Add(new Vector2(
+                                j * blockSize * blockScale,
+                                i * blockSize * blockScale));
                         }
                         // 他を生成
                         else
@@ -504,7 +572,10 @@ public class StageManager : MonoBehaviour
                             (GameManager.instance.n_stage * (floorHeight + wallHeight) + h) * blockSize * block.transform.localScale.y,
                             /*GameManager.instance.n_stage * (h+floorHeight+1) * blockSize * block.transform.localScale.y,*/
                             i * blockSize * block.transform.localScale.z), Quaternion.identity);
+
+
                     }
+                    
                 }
 
 
@@ -585,8 +656,42 @@ public class StageManager : MonoBehaviour
         // テキスト生成
         if (isGenerating == false)
         {
-            //SetText();
-            GenerateQuiz();
+            SetText();
+            //GenerateQuiz();
+        }
+
+
+        // プレイヤのPosを保持していく
+        posTimer += Time.deltaTime;
+        if (playerPosSeq.Count < n_playerPos)
+        {
+            Vector2 playerPos = new Vector2(player.transform.position.x, player.transform.position.z);
+            if (posTimer > posAddTime)
+            {
+                playerPosSeq.Add(playerPos);
+                posTimer = 0.0f;
+            }
+        }
+        else
+        {
+            playerPosSeq.RemoveAt(0);
+            Vector2 playerPos = new Vector2(player.transform.position.x, player.transform.position.z);
+            if (posTimer > posAddTime)
+            {
+                playerPosSeq.Add(playerPos);
+                posTimer = 0.0f;
+            }
+        }
+
+
+        // イベント中は、テキストを表示させない
+        if (GameManager.instance.isEventDoing)
+        {
+            textMeshPro.gameObject.SetActive(false);
+        }
+        else
+        {
+            textMeshPro.gameObject.SetActive(true);
         }
     }
 }

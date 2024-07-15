@@ -12,6 +12,9 @@ public class RestaratEvent : MonoBehaviour
         // ゲームマネージャーの情報を初期化する
         GameManager.instance.InitGame();
 
+        // ゲーム時間を進める
+        Time.timeScale = 1.0f;
+
         // シーン遷移
         SceneManager.LoadScene("stage");
     }

@@ -56,6 +56,10 @@ public class GameManager : MonoBehaviour
         beforeScene = "title";
         /* lavaTimeはStageMangerでリセットする */
         n_lava_stage = 0;
+
+        score = 0;
+        lavaTime = 0.0f;
+
     }
 
 

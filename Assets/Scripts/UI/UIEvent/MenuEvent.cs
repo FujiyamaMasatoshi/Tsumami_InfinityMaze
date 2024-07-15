@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class MenuEvent : MonoBehaviour
 {
+    public GameObject menuPanel = null;
     private bool isOpenMenu = false;
+
     // Start is called before the first frame update
     void Start()
     {
         isOpenMenu = false;
+        menuPanel.SetActive(false); // active false
     }
 
     // Update is called once per frame
@@ -23,6 +26,8 @@ public class MenuEvent : MonoBehaviour
                 isOpenMenu = false;
                 GameManager.instance.isEventDoing = false;
                 Time.timeScale = 1.0f;
+
+                menuPanel.SetActive(false);
 
                 
             }
@@ -39,8 +44,8 @@ public class MenuEvent : MonoBehaviour
                 // ゲーム時間を止める
                 Time.timeScale = 0.0f;
 
-                // menu画面での処理
-                Menu();
+                // メニュー画面を開く
+                menuPanel.SetActive(true);
             }
         }
     }
