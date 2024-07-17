@@ -20,6 +20,7 @@ public class PlayerController : MonoBehaviour
     private bool isOnFloor = false;
     [SerializeField] private int max_jump = 3;
     private int now_jump = 0;
+    public AudioClip jump_se = null;
 
     // movement
     private float moveSpeed;
@@ -125,6 +126,7 @@ public class PlayerController : MonoBehaviour
                 rb.AddForce(Vector3.up * jumpHeight, ForceMode.Impulse);
                 isOnFloor = false;
                 now_jump += 1;
+                if (jump_se != null) SoundManager.instance.PlaySE(jump_se, 0.5f);
             }
         }
     }

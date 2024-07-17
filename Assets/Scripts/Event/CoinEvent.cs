@@ -6,7 +6,9 @@ public class CoinEvent : MonoBehaviour
 {
     [SerializeField] int point = 50;
     [SerializeField] float rotateSpeed = 50;
+    [SerializeField] float vol = 1.0f; //音量
 
+    public AudioClip se = null;
 
     // コインゲット
     private void OnTriggerEnter(Collider other)
@@ -15,6 +17,7 @@ public class CoinEvent : MonoBehaviour
         {
             GameManager.instance.score += point;
             Destroy(this.gameObject);
+            SoundManager.instance.PlaySE(se, vol);
         }
         if (other.CompareTag("lava"))
         {

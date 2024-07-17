@@ -131,7 +131,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   point: 50
   rotateSpeed: 90
-  body: {fileID: 6276530247894796510}
+  vol: 0.5
+  se: {fileID: 8300000, guid: 35baad19827f446a6ae7da3d4fdb23c5, type: 3}
 --- !u!136 &2251294854183588375
 CapsuleCollider:
   m_ObjectHideFlags: 0
