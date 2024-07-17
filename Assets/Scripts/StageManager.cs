@@ -27,9 +27,10 @@ public class StageManager : MonoBehaviour
     [SerializeField] private int floorHeight = 1; //床の高さ
     [SerializeField] private float startLavaHeight = -10;
     [SerializeField] private int n_enemy = 5;
+    [SerializeField] private int n_coins = 10;
     [SerializeField] private uint max_token = 32;
     [SerializeField] private float temperature = 0.5f;
-
+    [SerializeField] private float nonFloorRate = 0.3f; // 床を消す割合
 
 
     // LLM
@@ -56,6 +57,7 @@ public class StageManager : MonoBehaviour
     private char TREASURE = 't';
     private char GOAL = 'g';
     private char ENEMY = 'e';
+    private char COIN = 'c';
     
     private int[] startPoint = { 0, 0}; // スタート地点
     private int[] goalPoint = { 0, 0 }; // ゴール地点
@@ -65,6 +67,13 @@ public class StageManager : MonoBehaviour
 
     // Start is called before the first frame update
     void Start()
+    {
+        // ゲームスタート
+        GameStart();
+
+    }
+
+    private void GameStart()
     {
         // ゲーム初期化
         GameManager.instance.InitGame();
@@ -77,12 +86,10 @@ public class StageManager : MonoBehaviour
         llm = new Llama(modelPath); //If there is insufficient memory, the model will fail to load.
 
         initPrompt = "あなたはこれから与えられる指示に忠実なアシスタントです。あなたには(1)プレイヤの進んでいるベクトルとプレイヤとゴールまでのベクトルのcos類似度と、(2)ゲームオーバーまでの時間が与えられます。プレイヤに適切な言葉をかけてください。\n";
-        
-         
-        //userPrompt += initPrompt;
+
 
         // GMのタイマーをリセット (waitTime + lavaHeight)に設定
-        GameManager.instance.lavaTime = Mathf.Abs(startLavaHeight)/lavaMovingSpeed;
+        GameManager.instance.lavaTime = Mathf.Abs(startLavaHeight) / lavaMovingSpeed;
         GameManager.instance.n_lava_stage += 1;
 
         // マグマ生成
@@ -108,8 +115,6 @@ public class StageManager : MonoBehaviour
             // 迷路Objを生成
             GenerateMazeInScene();
         }
-
-
     }
 
 
@@ -264,21 +269,6 @@ public class StageManager : MonoBehaviour
         Debug.Log(map_string);
     }
 
-    // map情報を文字列型で取得
-    private string GetMap()
-    {
-        string result = "";
-        for (int i=0; i<MAZE_VERTICAL; i++)
-        {
-            for (int j=0; j<MAZE_WIDTH; j++)
-            {
-                result += map[i, j];
-            }
-            result += "\n";
-        }
-        return result;
-    }
-
 
     private void GenerateMap()
     {
@@ -296,7 +286,10 @@ public class StageManager : MonoBehaviour
 
 
         // Enemyを配置
-        SetEnemy();
+        //SetEnemy();
+
+        // Coinを設置
+        SetCoins();
     }
 
     // 迷路マップの初期化
@@ -481,6 +474,21 @@ public class StageManager : MonoBehaviour
         }
     }
 
+    private void SetCoins()
+    {
+        int now_coin = 0;
+        while (now_coin < n_coins)
+        {
+            int x = Random.Range(0, MAZE_WIDTH);
+            int y = Random.Range(0, MAZE_VERTICAL);
+            if (map[y, x] == PATH)
+            {
+                map[y, x] = COIN;
+                now_coin += 1;
+            }
+        }
+    }
+
     // Scene上に迷路を生成させる
     private void GenerateMazeInScene()
     {
@@ -515,12 +523,21 @@ public class StageManager : MonoBehaviour
                     (GameManager.instance.n_stage * (floorHeight + wallHeight) + floorHeight) * blockSize * goalBlock.transform.localScale.y,
                     i * blockSize * goalBlock.transform.localScale.z), Quaternion.identity);
                     }
+                    // 床をランダムで生成
                     else
                     {
-                        Instantiate(block, new Vector3(
-                    j * blockSize * block.transform.localScale.x,
-                    (GameManager.instance.n_stage * (floorHeight + wallHeight) + floorHeight) * blockSize * block.transform.localScale.y,
-                    i * blockSize * block.transform.localScale.z), Quaternion.identity);
+                        float p = Random.value;
+                        if (p < nonFloorRate)
+                        {
+                            // 何もしない
+                        }
+                        else
+                        {
+                            Instantiate(block, new Vector3(
+                        j * blockSize * block.transform.localScale.x,
+                        (GameManager.instance.n_stage * (floorHeight + wallHeight) + floorHeight) * blockSize * block.transform.localScale.y,
+                        i * blockSize * block.transform.localScale.z), Quaternion.identity);
+                        }
                     }
                     
                 }
@@ -550,10 +567,23 @@ public class StageManager : MonoBehaviour
                         // 他を生成
                         else
                         {
-                            Instantiate(block, new Vector3(
-                        j * blockSize * block.transform.localScale.x,
-                        (GameManager.instance.n_stage * (floorHeight + wallHeight) + floorHeight) * blockSize * block.transform.localScale.y,
-                        i * blockSize * block.transform.localScale.z), Quaternion.identity);
+                            //    Instantiate(block, new Vector3(
+                            //j * blockSize * block.transform.localScale.x,
+                            //(GameManager.instance.n_stage * (floorHeight + wallHeight) + floorHeight) * blockSize * block.transform.localScale.y,
+                            //i * blockSize * block.transform.localScale.z), Quaternion.identity);
+                            float p = Random.value;
+                            if (p < nonFloorRate)
+                            {
+                                // 何もしない
+                            }
+                            else
+                            {
+                                Instantiate(block, new Vector3(
+                            j * blockSize * block.transform.localScale.x,
+                            (GameManager.instance.n_stage * (floorHeight + wallHeight) + floorHeight) * blockSize * block.transform.localScale.y,
+                            i * blockSize * block.transform.localScale.z), Quaternion.identity);
+                            }
+
                         }
                     }
                 }
@@ -587,6 +617,16 @@ public class StageManager : MonoBehaviour
                         (GameManager.instance.n_stage * (floorHeight + wallHeight) + floorHeight + 1) * blockSize * block.transform.localScale.y,
                         i * blockSize * block.transform.localScale.z
                         ), Quaternion.identity);
+                }
+
+                // coinを生成
+                if (map[j, i] == COIN)
+                {
+                    GameObject coin = (GameObject)Resources.Load("Coin");
+                    Instantiate(coin, new Vector3(j * blockSize * block.transform.localScale.x,
+                        (GameManager.instance.n_stage * (floorHeight + wallHeight) + floorHeight + 1) * blockSize * block.transform.localScale.y,
+                        i * blockSize * block.transform.localScale.z
+                        ), Quaternion.Euler(0, 0, 90));
                 }
 
                 // プレイヤを設置

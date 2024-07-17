@@ -39,7 +39,8 @@ public class PlayerHide : MonoBehaviour
     void Update()
     {
         // 右クリックをした時
-        if (Input.GetMouseButtonDown(1))
+        //if (Input.GetMouseButtonDown(1))
+        if (Input.GetKeyDown(KeyCode.B))
         {
             // 隠れている状態ならば、
             if (isHide)

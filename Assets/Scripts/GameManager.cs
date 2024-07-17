@@ -27,6 +27,11 @@ public class GameManager : MonoBehaviour
     public int stagePoint = 500; // ステージ攻略につき500ポイント
     public int enemyPoint = 50; // エネミーを倒すにつき50ポイント
 
+
+    // ゲーム開始した時の最初に呼び出す
+    public bool isFirstExplanation = false; // 操作画面を呼び出したかどうか -- これはInitGame()で初期化しない
+
+
     // startの前に呼び出される
     private void Awake()
     {
