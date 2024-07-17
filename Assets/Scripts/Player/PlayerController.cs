@@ -121,7 +121,7 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (isOnFloor || now_jump < max_jump)
+            if (isOnFloor || now_jump < max_jump-1)
             {
                 rb.AddForce(Vector3.up * jumpHeight, ForceMode.Impulse);
                 isOnFloor = false;
