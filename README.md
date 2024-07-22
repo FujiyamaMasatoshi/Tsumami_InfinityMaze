@@ -1,5 +1,23 @@
 # TsumamiAdventure
 
+## ゲームの概要
+
+* 時間制限内に3D迷路ゲームをクリアしつづける
+* ゴールポイントに到達すると上のステージに進み、下から襲ってくるマグマから逃げ、ポイントを稼ぐゲーム
+<image src="src_readme/game_image.png">
+
+### プレイ動画
+プレイ動画は以下のURL(YouTube)から視聴可能です。
+
+URL: https://youtu.be/hEtkUWpbypI
+
+### 実行ファイルURL
+
+MacOSに対応した実行ファイルは以下のURLからダウンロードできます。
+確認済み動作環境 (M3Pro MacBook Pro, M2 MacBook Air)
+
+URL: https://drive.google.com/drive/folders/1ycmDWViFcNKX285dXzNuINVLluRMfbSa?usp=sharing
+
 ## こだわり
 
 * 大規模言語モデルによるアシスタントAI
