@@ -28,6 +28,9 @@ public class GameManager : MonoBehaviour
     public int enemyPoint = 50; // エネミーを倒すにつき50ポイント
 
 
+    // ランキングで使用する名前とスコア
+    public string rank_name = "";
+
     // ゲーム開始した時の最初に呼び出す
     public bool isFirstExplanation = false; // 操作画面を呼び出したかどうか -- これはInitGame()で初期化しない
 
@@ -65,8 +68,15 @@ public class GameManager : MonoBehaviour
         score = 0;
         lavaTime = 0.0f;
 
+        rank_name = "";
+
     }
 
+    // 登録されたプレイヤー名をスコアランキングに追加する
+    public void SetRankingScore()
+    {
+        //
+    }
 
     // Start is called before the first frame update
     void Start()

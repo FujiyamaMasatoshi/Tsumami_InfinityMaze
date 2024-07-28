@@ -173,11 +173,21 @@ public class StageManager : MonoBehaviour
     // 残り時間計算
     private void compute_RemainingTime()
     {
-        // 1層あたりの残り時間
-        float remaingTimePerFloor = (4 * floorHeight * blockSize * blockScale) / lavaMovingSpeed;
+        if (lavaMovingSpeed != 0)
+        {
+            // 1層あたりの残り時間
 
-        // 残り時間をセット
-        remaingTime = remaingTimePerFloor * (GameManager.instance.n_now_stage - GameManager.instance.n_lava_stage) + GameManager.instance.lavaTime;
+            float remaingTimePerFloor = (4 * floorHeight * blockSize * blockScale) / lavaMovingSpeed;
+
+            // 残り時間をセット
+            remaingTime = remaingTimePerFloor * (GameManager.instance.n_now_stage - GameManager.instance.n_lava_stage) + GameManager.instance.lavaTime;
+        }else
+        {
+            float remaingTimePerFloor = (4 * floorHeight * blockSize * blockScale) / 1;
+            // 残り時間をセット
+            remaingTime = remaingTimePerFloor * (GameManager.instance.n_now_stage - GameManager.instance.n_lava_stage) + GameManager.instance.lavaTime;
+        }
+        
     }
 
 
@@ -567,10 +577,12 @@ public class StageManager : MonoBehaviour
                         // 他を生成
                         else
                         {
+
                             //    Instantiate(block, new Vector3(
                             //j * blockSize * block.transform.localScale.x,
                             //(GameManager.instance.n_stage * (floorHeight + wallHeight) + floorHeight) * blockSize * block.transform.localScale.y,
                             //i * blockSize * block.transform.localScale.z), Quaternion.identity);
+
                             float p = Random.value;
                             if (p < nonFloorRate)
                             {
