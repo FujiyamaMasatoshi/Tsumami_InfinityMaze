@@ -85,6 +85,8 @@ public class StageManager : MonoBehaviour
         string modelPath = System.IO.Path.Combine(Application.streamingAssetsPath, "LLM_Model/Llama-3-ELYZA-JP-8B-Q3_K_L.gguf");
         llm = new Llama(modelPath); //If there is insufficient memory, the model will fail to load.
 
+        //llm.Run("");
+
         initPrompt = "あなたはこれから与えられる指示に忠実なアシスタントです。あなたには(1)プレイヤの進んでいるベクトルとプレイヤとゴールまでのベクトルのcos類似度と、(2)ゲームオーバーまでの時間が与えられます。プレイヤに適切な言葉をかけてください。\n";
 
 
