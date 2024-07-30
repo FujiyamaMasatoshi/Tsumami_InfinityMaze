@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class BGM : MonoBehaviour
 {
-    private AudioSource bgm = null;
+    private AudioSource bgmSource = null;
     // Start is called before the first frame update
     void Start()
     {
         // bgmを取得
-        bgm = GetComponent<AudioSource>();
+        bgmSource = GetComponent<AudioSource>();
 
         // SoundManagerのcurrentBgmにセットする
-        SoundManager.instance.currentBgm = bgm;
+        SoundManager.instance.currentBgmSource = bgmSource;
     }
 
     // Update is called once per frame
