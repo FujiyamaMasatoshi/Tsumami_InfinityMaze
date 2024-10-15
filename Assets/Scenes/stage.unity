@@ -465,11 +465,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7058458669409344074, guid: 3300bb4942f8e4129a12a9f0ad1065fd, type: 3}
       propertyPath: m_Name
-      value: expranationCanvas
+      value: explanationCanvas
       objectReference: {fileID: 0}
     - target: {fileID: 7058458669409344074, guid: 3300bb4942f8e4129a12a9f0ad1065fd, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1025,6 +1025,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1905278692
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1905278694}
+  - component: {fileID: 1905278693}
+  m_Layer: 0
+  m_Name: llm
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1905278693
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1905278692}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea686b1ce7c4e432fbf3f27d44de180c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1905278694
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1905278692}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 911.5911, y: 363.60678, z: -68.433044}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2044171413}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2044171412
 GameObject:
   m_ObjectHideFlags: 0
@@ -1055,6 +1099,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1905278694}
   - {fileID: 1272383084}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1075,13 +1120,14 @@ MonoBehaviour:
   textMeshPro: {fileID: 1053234254}
   player: {fileID: 425705506601872797}
   lavaObj: {fileID: 1551800161}
+  llm: {fileID: 1905278693}
   lavaMovingSpeed: 1
   wallHeight: 3
   floorHeight: 1
   startLavaHeight: -40
   n_enemy: 5
   n_coins: 20
-  max_token: 32
+  max_token: 64
   temperature: 0.5
   nonFloorRate: 0.15
   isGenerating: 0
@@ -2237,8 +2283,8 @@ SceneRoots:
   - {fileID: 2044171413}
   - {fileID: 1551800162}
   - {fileID: 7574940963071611824}
-  - {fileID: 912977195}
   - {fileID: 618978560766931403}
   - {fileID: 768259242}
   - {fileID: 6807992684631919908}
   - {fileID: 1017347352327017842}
+  - {fileID: 912977195}

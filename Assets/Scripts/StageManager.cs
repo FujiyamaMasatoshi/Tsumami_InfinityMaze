@@ -18,6 +18,8 @@ public class StageManager : MonoBehaviour
 
     [Header("プレイヤ")] public GameObject player = null;
     [Header("マグマ")] public GameObject lavaObj = null;
+
+    [SerializeField] private LLMWrapper llm;
     
     
     //[SerializeField] private float waitLavaMovingTime = 10.0f; // マグマが動き出すまでの時間
@@ -34,7 +36,7 @@ public class StageManager : MonoBehaviour
 
 
     // LLM
-    private Llama llm;
+    //private Llama llm;
     private string initPrompt = "";
     private string userPrompt = "";
     public bool isGenerating = false;
@@ -82,12 +84,12 @@ public class StageManager : MonoBehaviour
         // ######
         // LLM
         // ######
-        string modelPath = System.IO.Path.Combine(Application.streamingAssetsPath, "LLM_Model/Llama-3-ELYZA-JP-8B-Q3_K_L.gguf");
-        llm = new Llama(modelPath); //If there is insufficient memory, the model will fail to load.
+        llm.InitLLM();
+        //string modelPath = System.IO.Path.Combine(Application.streamingAssetsPath, "Model/stabilityai-japanese-stablelm-3b-4e1t-instruct-Q4_0.gguf");
+        //llm = new Llama(modelPath); //If there is insufficient memory, the model will fail to load.
 
-        //llm.Run("");
 
-        initPrompt = "あなたはこれから与えられる指示に忠実なアシスタントです。あなたには(1)プレイヤの進んでいるベクトルとプレイヤとゴールまでのベクトルのcos類似度と、(2)ゲームオーバーまでの時間が与えられます。プレイヤに適切な言葉をかけてください。\n";
+        initPrompt = "あなたはこれから与えられる指示に忠実なアシスタントです。あなたには(1)プレイヤの進んでいるベクトルとプレイヤとゴールまでのベクトルのcos類似度と、(2)ゲームオーバーまでの時間が与えられます。プレイヤに適切な言葉をかけてください。ただし、残り時間について具体的な言及はしないでください。\n";
 
 
         // GMのタイマーをリセット (waitTime + lavaHeight)に設定
@@ -133,13 +135,13 @@ public class StageManager : MonoBehaviour
         string ex1 = "(入力1)\n{\"cos\":1.0, \"time\":10.0}\n(出力1)「時間が残り少ないけど、向かっている方向にゴールがあるよ!!」\n";
         string ex2 = "(入力2)\n{\"cos\":-1.0, \"time\":30.0}\n(出力2)「ゴールと逆方向に進んでいるよ!!」\n";
         string ex3 = "(入力3)\n{\"cos\":-0.7, \"time\":35.0}\n(出力3)「ゴールと逆方向に進んでいるよ!!。時間はたっぷりあるから焦らないで!!」\n";
-        //string ex4 = "(入力4)\n{\"cos\":0.6, \"time\":15.0}\n(出力4)「残り時間が残り少なくなってきているよ。その調子でゴールまで急いで！！」\n";
+        string ex4 = "(入力4)\n{\"cos\":0.6, \"time\":15.0}\n(出力4)「残り時間が残り少なくなってきているよ。その調子でゴールまで急いで！！」\n";
 
-        string input = "(入力4)\n{\"cos\":"+cosSimilarity+", \"time\":"+remaingTime+"}\n(出力4)\n";
+        string input = "(入力5)\n{\"cos\":"+cosSimilarity+", \"time\":"+remaingTime+"}\n(出力5)\n";
 
         // few shot prompt
-        //userPrompt += ex1 + ex2 + ex3 + ex4 + input;
-        userPrompt += ex1 + ex2 + ex3 + input;
+        userPrompt += ex1 + ex2 + ex3 + ex4 + input;
+        //userPrompt += ex1 + ex2 + ex3 + input;
     }
 
 
@@ -206,14 +208,14 @@ public class StageManager : MonoBehaviour
         }
 
         if (quotedParts.Count != 0) return quotedParts[0];
-        else return "";
+        else return "cannot get pattern"+input;
     }
 
 
     // 非同期処理
     private string AsyncGenerateText()
     {
-        string result = llm.Run(userPrompt, maxTokens: max_token, temperature: temperature);
+        string result = llm.Run(userPrompt, max_token, temperature);
         return result;
     }
 
